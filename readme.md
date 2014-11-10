@@ -1,3 +1,13 @@
+# xWordpress Theme based on HTML5 Reset Wordpress Theme
+apply a few revision with social media focus and to meet Wordpress Theme Checker compatibility
+
+## November 10 Update
+1. Move Social Media's meta to top
+2. Change hardcoded date
+3. Change get_bloginfo('url') with home_url()
+4. Add custom background, image header and add_editor_style
+ 
+
 #  HTML5 Reset WordPress Theme
 
 ## January 10 Update
