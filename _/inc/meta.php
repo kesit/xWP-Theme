@@ -1,5 +1,5 @@
 <footer class="meta">
-	<i>Posted on:</i> <time datetime="<?php echo date(DATE_W3C); ?>" pubdate class="updated"><?php the_time('F jS, Y') ?></time>
+	<i>Posted on:</i> <time datetime="<?php echo date(DATE_W3C); ?>" pubdate class="updated"><?php the_time(get_option( 'date_format' )) ?></time>
 	<span class="byline author vcard">
 		<i>by</i> <span class="fn"><?php the_author() ?></span>
 	</span>
