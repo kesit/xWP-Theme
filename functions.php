@@ -1,10 +1,8 @@
 <?php
-/**
- * @package WordPress
- * @subpackage HTML5-Reset-WordPress-Theme
- * @since HTML5 Reset 2.0
- */
-
+if ( ! isset( $content_width ) ) {
+	$content_width = 600;
+}
+		
 	// Options Framework (https://github.com/devinsays/options-framework-plugin)
 	if ( !function_exists( 'optionsframework_init' ) ) {
 		define( 'OPTIONS_FRAMEWORK_DIRECTORY', get_template_directory_uri() . '/_/inc/' );
@@ -12,66 +10,69 @@
 	}
 
 	// Theme Setup (based on twentythirteen: http://make.wordpress.org/core/tag/twentythirteen/)
-	function html5reset_setup() {
+	function xWP_setup() {
 		load_theme_textdomain( 'html5reset', get_template_directory() . '/languages' );
-		add_theme_support( 'automatic-feed-links' );
-		add_theme_support( 'structured-post-formats', array( 'link', 'video' ) );
-		add_theme_support( 'post-formats', array( 'aside', 'audio', 'chat', 'gallery', 'image', 'quote', 'status' ) );
+		add_theme_support( 'automatic-feed-links' );	
 		register_nav_menu( 'primary', __( 'Navigation Menu', 'html5reset' ) );
-		add_theme_support( 'post-thumbnails' );
+		add_theme_support('post-thumbnails');
+		add_theme_support('custom-background');
+		add_theme_support('custom-header');
+		add_editor_style( 'custom-editor-style.css' );
 	}
-	add_action( 'after_setup_theme', 'html5reset_setup' );
+	add_action( 'after_setup_theme', 'xWP_setup' );
+	
 
-	// Scripts & Styles (based on twentythirteen: http://make.wordpress.org/core/tag/twentythirteen/)
-	function html5reset_scripts_styles() {
+	function print_webfont() {
+		if ( wp_script_is( 'jquery', 'done' ) ) {
+			?>
+			<script type="text/javascript">
+				WebFontConfig={google:{families:['Roboto:400,400italic,300,700,700italic,300italic:latin']}};(function(){var wf=document.createElement('script');wf.src=('https:'==document.location.protocol?'https':'http')+'://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';wf.type='text/javascript';wf.async='true';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(wf,s);})();
+			</script>
+		<?php
+		}
+	}
+	add_action( 'wp_footer', 'print_webfont' );
+
+	
+/* -------- WP Header Stuff
+
+xWP_wp_title: Title of Pages setup
+removeHeadLinks: Clean head section from rsd link and wlwmanifest link
+xWP_scripts_styles: Header scripts and style queue
+
+-------------------------------------------------*/
+	function xWP_wp_title( $title, $sep ) {
+		global $paged, $page;
+	
+		if ( is_feed() )
+			return $title;
+	
+		$site_description = get_bloginfo( 'description', 'display' );
+		$title .= get_bloginfo( 'name' ).': '.$site_description;		
+	
+		if ( $paged >= 2 || $page >= 2 )
+			$title = "$title $sep " . sprintf( __( 'Page %s', 'html5reset' ), max( $paged, $page ) );
+		
+		return $title;
+	}
+	add_filter( 'wp_title', 'xWP_wp_title', 10, 2 );
+
+	function removeHeadLinks() {
+		remove_action('wp_head', 'rsd_link');
+		remove_action('wp_head', 'wlwmanifest_link');
+	}
+	add_action('init', 'removeHeadLinks');
+
+	function xWP_scripts_styles() {
 		global $wp_styles;
-
-		// Load Comments
+	
 		if ( is_singular() && comments_open() && get_option( 'thread_comments' ) )
 			wp_enqueue_script( 'comment-reply' );
 
-		// Load Stylesheets
-//		wp_enqueue_style( 'html5reset-reset', get_template_directory_uri() . '/reset.css' );
-//		wp_enqueue_style( 'html5reset-style', get_stylesheet_uri() );
-
-		// Load IE Stylesheet.
-//		wp_enqueue_style( 'html5reset-ie', get_template_directory_uri() . '/css/ie.css', array( 'html5reset-style' ), '20130213' );
-//		$wp_styles->add_data( 'html5reset-ie', 'conditional', 'lt IE 9' );
-
-		// Modernizr
-		// This is an un-minified, complete version of Modernizr. Before you move to production, you should generate a custom build that only has the detects you need.
-		// wp_enqueue_script( 'html5reset-modernizr', get_template_directory_uri() . '/_/js/modernizr-2.6.2.dev.js' );
-
+		// You should generate a custom build that only has the detects you need.
+		wp_enqueue_script( 'xWP-modernizr', get_template_directory_uri() . '/_/js/modernizr-2.7.0.dev.js' );
 	}
-	add_action( 'wp_enqueue_scripts', 'html5reset_scripts_styles' );
-
-	// WP Title (based on twentythirteen: http://make.wordpress.org/core/tag/twentythirteen/)
-	function html5reset_wp_title( $title, $sep ) {
-		global $paged, $page;
-
-		if ( is_feed() )
-			return $title;
-
-//		 Add the site name.
-		$title .= get_bloginfo( 'name' );
-
-//		 Add the site description for the home/front page.
-		$site_description = get_bloginfo( 'description', 'display' );
-		if ( $site_description && ( is_home() || is_front_page() ) )
-			$title = "$title $sep $site_description";
-
-//		 Add a page number if necessary.
-		if ( $paged >= 2 || $page >= 2 )
-			$title = "$title $sep " . sprintf( __( 'Page %s', 'html5reset' ), max( $paged, $page ) );
-
-		return $title;
-	}
-	add_filter( 'wp_title', 'html5reset_wp_title', 10, 2 );
-
-
-
-
-//OLD STUFF BELOW
+	add_action( 'wp_enqueue_scripts', 'xWP_scripts_styles' );
 
 
 	// Load jQuery
@@ -79,26 +80,21 @@
 		function core_mods() {
 			if ( !is_admin() ) {
 				wp_deregister_script( 'jquery' );
-				wp_register_script( 'jquery', ( "http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" ), false);
+				wp_register_script( 'jquery', ( "//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" ), false);
 				wp_enqueue_script( 'jquery' );
 			}
 		}
 		add_action( 'wp_enqueue_scripts', 'core_mods' );
 	}
 
-	// Clean up the <head>, if you so desire.
-	//	function removeHeadLinks() {
-	//    	remove_action('wp_head', 'rsd_link');
-	//    	remove_action('wp_head', 'wlwmanifest_link');
-	//    }
-	//    add_action('init', 'removeHeadLinks');
+
 
 	// Custom Menu
 	register_nav_menu( 'primary', __( 'Navigation Menu', 'html5reset' ) );
 
 	// Widgets
 	if ( function_exists('register_sidebar' )) {
-		function html5reset_widgets_init() {
+		function xWP_widgets_init() {
 			register_sidebar( array(
 				'name'          => __( 'Sidebar Widgets', 'html5reset' ),
 				'id'            => 'sidebar-primary',
@@ -108,14 +104,14 @@
 				'after_title'   => '</h3>',
 			) );
 		}
-		add_action( 'widgets_init', 'html5reset_widgets_init' );
+		add_action( 'widgets_init', 'xWP_widgets_init' );
 	}
 
 	// Navigation - update coming from twentythirteen
 	function post_navigation() {
 		echo '<div class="navigation">';
-		echo '	<div class="next-posts">'.get_next_posts_link('&laquo; Older Entries').'</div>';
-		echo '	<div class="prev-posts">'.get_previous_posts_link('Newer Entries &raquo;').'</div>';
+		echo '	<div class="next-posts">'.get_next_posts_link('&laquo; Older Entries', 'html5reset').'</div>';
+		echo '	<div class="prev-posts">'.get_previous_posts_link('Newer Entries &raquo;', 'html5reset').'</div>';
 		echo '</div>';
 	}
 
@@ -129,5 +125,24 @@
 			esc_attr( get_the_author() )
 		);
 	}
+	
+function get_excerpt_by_id($post_id){
+    $the_post = get_post($post_id); //Gets post ID
+    if($the_post->post_excerpt =='') {
+	    $the_excerpt = $the_post->post_content; //Gets post_content to be used as a basis for the excerpt	    
+    } else {
+	    $the_excerpt = $the_post->post_excerpt;
+    }
+    $excerpt_length = 35; //Sets excerpt length by word count
+    $the_excerpt = strip_tags(strip_shortcodes($the_excerpt)); //Strips tags and images
+    $words = explode(' ', $the_excerpt, $excerpt_length + 1);
+
+    if(count($words) > $excerpt_length) :
+        array_pop($words);
+        array_push($words, '...');
+        $the_excerpt = implode(' ', $words);
+    endif;
+    return $the_excerpt;
+}
 
 ?>

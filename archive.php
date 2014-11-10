@@ -1,9 +1,4 @@
 <?php
-/**
- * @package WordPress
- * @subpackage HTML5-Reset-WordPress-Theme
- * @since HTML5 Reset 2.0
- */
  get_header(); ?>
 
 		<?php if (have_posts()) : ?>
@@ -17,13 +12,13 @@
 				<h2><?php _e('Posts Tagged','html5reset'); ?> &#8216;<?php single_tag_title(); ?>&#8217;</h2>
 
 			<?php /* If this is a daily archive */ } elseif (is_day()) { ?>
-				<h2><?php _e('Archive for','html5reset'); ?> <?php the_time('F jS, Y'); ?></h2>
+				<h2><?php _e('Archive for','html5reset'); ?> <?php the_time(get_option( 'date_format' )); ?></h2>
 
 			<?php /* If this is a monthly archive */ } elseif (is_month()) { ?>
-				<h2><?php _e('Archive for','html5reset'); ?> <?php the_time('F, Y'); ?></h2>
+				<h2><?php _e('Archive for','html5reset'); ?> <?php the_time(get_option( 'date_format' )); ?></h2>
 
 			<?php /* If this is a yearly archive */ } elseif (is_year()) { ?>
-				<h2 class="pagetitle"><?php _e('Archive for','html5reset'); ?> <?php the_time('Y'); ?></h2>
+				<h2 class="pagetitle"><?php _e('Archive for','html5reset'); ?> <?php the_time(get_option( 'date_format' )); ?></h2>
 
 			<?php /* If this is an author archive */ } elseif (is_author()) { ?>
 				<h2 class="pagetitle"><?php _e('Author Archive','html5reset'); ?></h2>
