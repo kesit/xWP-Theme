@@ -60,8 +60,35 @@ xWP_scripts_styles: Header scripts and style queue
 	function removeHeadLinks() {
 		remove_action('wp_head', 'rsd_link');
 		remove_action('wp_head', 'wlwmanifest_link');
+        	remove_action('wp_head', 'wp_generator');
+        	remove_action('wp_head', 'feed_links', 2);
+        	remove_action('wp_head', 'index_rel_link');
+        	remove_action('wp_head', 'feed_links_extra', 3);
+        	remove_action('wp_head', 'start_post_rel_link', 10, 0);
+        	remove_action('wp_head', 'parent_post_rel_link', 10, 0);
+        	remove_action('wp_head', 'adjacent_posts_rel_link', 10, 0);
+        	add_filter( 'script_loader_src', 'remove_src_version' );
+        	add_filter( 'style_loader_src', 'remove_src_version' );
+        	add_filter('wp_headers', 'remove_x_pingback');
 	}
 	add_action('init', 'removeHeadLinks');
+	
+	function remove_src_version ( $src ) {
+		global $wp_version;
+
+      		$version_str = '?ver='.$wp_version;
+      		$version_str_offset = strlen( $src ) - strlen( $version_str );
+
+      		if( substr( $src, $version_str_offset ) == $version_str )
+        		return substr( $src, 0, $version_str_offset );
+      		else
+        		return $src;
+	}
+
+    	function remove_x_pingback($headers) {
+        	unset($headers['X-Pingback']);
+        	return $headers;
+    	}
 
 	function xWP_scripts_styles() {
 		global $wp_styles;
